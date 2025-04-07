@@ -1,0 +1,49 @@
+@page "/login"
+@inject HttpClient Http
+@using System.Net.Http.Json
+
+<h3>Login</h3>
+
+<div>
+    <label>Email:</label>
+    <input @bind="login.Email" />
+</div>
+<div>
+    <label>Senha:</label>
+    <input type="password" @bind="login.Senha" />
+</div>
+<button @onclick="FazerLogin">Entrar</button>
+
+<p>@mensagem</p>
+
+@code {
+    private LoginDTO login = new();
+    private string mensagem;
+
+    private async Task FazerLogin()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/usuario/login", login);
+
+            if (response.IsSuccessStatusCode)
+            {
+                mensagem = "Login realizado com sucesso!";
+            }
+            else
+            {
+                mensagem = "Falha no login: " + response.StatusCode;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = "Erro: " + ex.Message;
+        }
+    }
+
+    public class LoginDTO
+    {
+        public string Email { get; set; }
+        public string Senha { get; set; }
+    }
+}
