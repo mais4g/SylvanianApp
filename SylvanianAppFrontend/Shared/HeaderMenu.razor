@@ -1,0 +1,48 @@
+﻿@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<div class="header">
+    <span class="logo">SylvanianApp</span>
+    @if (!string.IsNullOrEmpty(usuario))
+    {
+        <span class="welcome">Olá, @usuario!</span>
+    }
+</div>
+
+@code {
+    private string usuario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await localStorage.GetItemAsync<string>("usuario");
+    }
+}
+
+
+<style>
+    .header-menu {
+        background-color: #5e3796;
+        padding: 12px 20px;
+        text-align: center;
+        border-radius: 0 0 16px 16px;
+    }
+
+    .header-menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+    }
+
+    .header-menu li a {
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 1.1rem;
+    }
+
+    .header-menu li a:hover {
+        text-decoration: underline;
+    }
+</style>

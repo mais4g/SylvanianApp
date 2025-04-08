@@ -1,0 +1,69 @@
+﻿@page "/criar-conta"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using System.Net.Http.Json
+
+<link href="css/login.css" rel="stylesheet" />
+
+<div class="login-container">
+    <h1 class="login-title">Criar<span class="dash">-</span><span class="in">Conta</span></h1>
+
+    <div class="input-group">
+        <label for="nome"><i class="icon-user"></i></label>
+        <input id="nome" placeholder="Nome completo" @bind="usuario.Nome" />
+    </div>
+    <div class="input-group">
+        <label for="email"><i class="icon-user"></i></label>
+        <input id="email" placeholder="Email" @bind="usuario.Email" />
+    </div>
+    <div class="input-group">
+        <label for="senha"><i class="icon-lock"></i></label>
+        <input id="senha" type="password" placeholder="Senha" @bind="usuario.Senha" />
+    </div>
+
+    <button class="login-button" @onclick="CriarContaAsync">
+        <span>&rarr;</span>
+    </button>
+
+    <p class="mensagem">@mensagem</p>
+
+    <div class="login-links">
+        <a href="/login">Voltar ao login</a>
+    </div>
+</div>
+
+@code {
+    private CriarContaDTO usuario = new();
+    private string mensagem;
+
+    private async Task CriarContaAsync()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/usuario/criar-conta", usuario);
+
+            if (response.IsSuccessStatusCode)
+            {
+                mensagem = "Conta criada com sucesso! Redirecionando...";
+                await Task.Delay(1000);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                mensagem = "Erro: " + error;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = "Erro: " + ex.Message;
+        }
+    }
+
+    public class CriarContaDTO
+    {
+        public string Nome { get; set; }
+        public string Email { get; set; }
+        public string Senha { get; set; }
+    }
+}
