@@ -1,10 +1,13 @@
 @page "/login"
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@using System.Net.Http.Json
-@using SylvanianAppFrontend.Shared
-@using Blazored.LocalStorage
+@inject AuthenticationStateProvider AuthProvider
 @inject ILocalStorageService localStorage
+
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Authorization
+@using SylvanianAppFrontend.Authentication
+@using SylvanianAppFrontend.Shared
 
 <link href="css/login.css" rel="stylesheet" />
 
@@ -45,7 +48,11 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+
                 await localStorage.SetItemAsync("usuario", result.usuario);
+
+                var customAuth = (CustomAuthenticationStateProvider)AuthProvider;
+                await customAuth.LoginAsync();
 
                 mensagem = result.mensagem;
                 await Task.Delay(1000);
