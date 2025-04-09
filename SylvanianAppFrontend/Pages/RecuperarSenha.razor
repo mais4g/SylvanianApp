@@ -1,4 +1,4 @@
-﻿@page "/criar-conta"
+﻿@* @page "/RecuperarSenha"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @using System.Net.Http.Json
@@ -42,7 +42,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/usuario/criar-conta", usuario);
+        // var response = await Http.PostAsJsonAsync("api/usuario/CriarConta", usuario);
 
             if (response.IsSuccessStatusCode)
             {
@@ -69,3 +69,4 @@
         public string Senha { get; set; }
     }
 }
+ *@
