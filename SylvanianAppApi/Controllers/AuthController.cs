@@ -3,6 +3,7 @@ using SylvanianAppShared.DTOs;
 using SylvanianAppApi.Models;
 using SylvanianAppApi.Data;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace SylvanianAppApi.Controllers
 {
@@ -20,13 +21,19 @@ namespace SylvanianAppApi.Controllers
         [HttpPost("Login")]
         public IActionResult Login(LoginDTO dto)
         {
-            var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == dto.Email && u.Senha == dto.Senha && u.Ativo);
-            if (usuario == null)
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == dto.Email && u.Ativo);
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(dto.Senha, usuario.Senha))
             {
                 return Unauthorized("Email ou senha inválidos.");
             }
 
-            return Ok(new { mensagem = "Login realizado com sucesso!", usuario = usuario.Nome });
+            return Ok(new
+            {
+                mensagem = "Login realizado com sucesso!",
+                usuario = usuario.Nome,
+                usuarioEhAdmin = usuario.Administrador
+            });
+
         }
 
         [HttpPost("CriarConta")]
@@ -37,11 +44,13 @@ namespace SylvanianAppApi.Controllers
                 return BadRequest("Já existe um usuário com esse e-mail.");
             }
 
+            var senhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
+
             var novoUsuario = new Usuario
             {
                 Nome = dto.Nome,
                 Email = dto.Email,
-                Senha = dto.Senha,
+                Senha = senhaHash,
                 Ativo = true
             };
 
@@ -77,7 +86,6 @@ namespace SylvanianAppApi.Controllers
             return Ok("Usuário ativado com sucesso.");
         }
 
-
         [HttpPost("RecuperarSenha")]
         public IActionResult RecuperarSenha([FromBody] RecuperarSenhaDTO dto)
         {
@@ -92,7 +100,7 @@ namespace SylvanianAppApi.Controllers
         [HttpGet("ativos")]
         public async Task<IActionResult> ObterUsuarios()
         {
-            var usuarios = await _context.Usuarios.ToListAsync(); // ou onde estiver buscando os dados
+            var usuarios = await _context.Usuarios.ToListAsync();
             return Ok(usuarios);
         }
 
@@ -106,9 +114,8 @@ namespace SylvanianAppApi.Controllers
             usuario.Nome = dto.Nome;
             usuario.Email = dto.Email;
 
-            // Atualiza a senha só se foi informada
             if (!string.IsNullOrWhiteSpace(dto.Senha))
-                usuario.Senha = dto.Senha;
+                usuario.Senha = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
 
             _context.SaveChanges();
 
@@ -127,7 +134,5 @@ namespace SylvanianAppApi.Controllers
 
             return Ok(usuarios);
         }
-
-
     }
 }

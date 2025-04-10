@@ -4,5 +4,7 @@ namespace SylvanianAppShared.DTOs
     {
         public string Email { get; set; }
         public string Senha { get; set; }
+
+        //public bool Administrador { get; set; } = false;
     }
 }

@@ -8,6 +8,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using SylvanianAppFrontend.Authentication
 @using SylvanianAppFrontend.Shared
+@layout MainLayout
+
 
 <link href="css/login.css" rel="stylesheet" />
 
@@ -50,6 +52,8 @@
                 var result = await response.Content.ReadFromJsonAsync<LoginResult>();
 
                 await localStorage.SetItemAsync("usuario", result.usuario);
+                await localStorage.SetItemAsync("isLoggedIn", true);
+                await localStorage.SetItemAsync("isAdmin", result.usuarioEhAdmin);
 
                 var customAuth = (CustomAuthenticationStateProvider)AuthProvider;
                 await customAuth.LoginAsync();
@@ -74,5 +78,6 @@
     {
         public string mensagem { get; set; }
         public string usuario { get; set; }
+        public bool usuarioEhAdmin { get; set; }
     }
 }

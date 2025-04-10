@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -17,15 +18,22 @@ namespace SylvanianAppFrontend.Authentication
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var isLoggedIn = await _localStorage.GetItemAsync<bool>("isLoggedIn");
+            var isAdmin = await _localStorage.GetItemAsync<bool>("isAdmin");
 
             ClaimsIdentity identity;
             if (isLoggedIn)
             {
-                // Aqui você pode adicionar claims reais do usuário (ex: nome, email, roles, etc)
-                identity = new ClaimsIdentity(new[]
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, "UsuárioDemo")
+        };
+
+                if (isAdmin)
                 {
-                    new Claim(ClaimTypes.Name, "UsuárioDemo")
-                }, "FakeAuthType");
+                    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                }
+
+                identity = new ClaimsIdentity(claims, "FakeAuthType");
             }
             else
             {
@@ -36,15 +44,19 @@ namespace SylvanianAppFrontend.Authentication
             return new AuthenticationState(user);
         }
 
+
         public async Task LoginAsync()
         {
+            var isAdmin = await _localStorage.GetItemAsync<bool>("isAdmin");
             await _localStorage.SetItemAsync("isLoggedIn", true);
+            await _localStorage.SetItemAsync("isAdmin", isAdmin);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
         public async Task LogoutAsync()
         {
             await _localStorage.RemoveItemAsync("isLoggedIn");
+            await _localStorage.RemoveItemAsync("isAdmin");
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
     }

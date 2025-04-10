@@ -4,9 +4,13 @@
 @using System.Net.Http.Json
 @using SylvanianAppShared.DTOs;
 @inject IJSRuntime JS
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin")]
 
 
-<link href="css/home.css" rel="stylesheet" />
+
+<link href="css/login.css" rel="stylesheet" />
+
 
 <h1 class="boas-vindas">Configurar Contas</h1>
 
