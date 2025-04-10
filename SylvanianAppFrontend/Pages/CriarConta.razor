@@ -42,7 +42,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/usuario/CriarConta", usuario);
+            var response = await Http.PostAsJsonAsync("api/auth/CriarConta", usuario);
 
             if (response.IsSuccessStatusCode)
             {

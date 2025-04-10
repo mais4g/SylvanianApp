@@ -1,0 +1,39 @@
+﻿@inject NavigationManager Navigation
+@inject ILocalStorageService localStorage
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+
+<CascadingAuthenticationState>
+    @if (!isAuthenticatedChecked)
+    {
+        <p>Verificando autenticação...</p>
+    }
+    else if (!isAuthenticated)
+    {
+        <p>Redirecionando para o login...</p>
+    }
+    else
+    {
+        @Body
+    }
+</CascadingAuthenticationState>
+
+@code {
+    private bool isAuthenticated = false;
+    private bool isAuthenticatedChecked = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isLoggedIn = await localStorage.GetItemAsync<bool>("isLoggedIn");
+        if (!isLoggedIn)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        else
+        {
+            isAuthenticated = true;
+        }
+
+        isAuthenticatedChecked = true;
+    }
+}

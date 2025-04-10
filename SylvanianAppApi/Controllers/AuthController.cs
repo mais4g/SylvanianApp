@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using SylvanianAppApi.DTOs;
+using SylvanianAppShared.DTOs;
 using SylvanianAppApi.Models;
 using SylvanianAppApi.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace SylvanianAppApi.Controllers
 {
@@ -63,6 +64,20 @@ namespace SylvanianAppApi.Controllers
             return Ok("Usuário inativado com sucesso.");
         }
 
+        [HttpPut("ativar/{id}")]
+        public IActionResult AtivarConta(int id)
+        {
+            var usuario = _context.Usuarios.Find(id);
+            if (usuario == null || usuario.Ativo)
+                return NotFound("Usuário não encontrado ou já está ativo.");
+
+            usuario.Ativo = true;
+            _context.SaveChanges();
+
+            return Ok("Usuário ativado com sucesso.");
+        }
+
+
         [HttpPost("RecuperarSenha")]
         public IActionResult RecuperarSenha([FromBody] RecuperarSenhaDTO dto)
         {
@@ -74,16 +89,45 @@ namespace SylvanianAppApi.Controllers
             return Ok("Se o e-mail estiver correto, uma mensagem foi enviada com instruções.");
         }
 
-        [HttpGet("Ativos")]
-        public IActionResult ListarUsuariosAtivos()
+        [HttpGet("ativos")]
+        public async Task<IActionResult> ObterUsuarios()
         {
-            var usuarios = _context.Usuarios
-                .Where(u => u.Ativo)
-                .Select(u => new { u.Id, u.Nome, u.Email })
-                .ToList();
+            var usuarios = await _context.Usuarios.ToListAsync(); // ou onde estiver buscando os dados
+            return Ok(usuarios);
+        }
+
+        [HttpPut("editar/{id}")]
+        public IActionResult EditarConta(int id, [FromBody] UsuarioDTO dto)
+        {
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id && u.Ativo);
+            if (usuario == null)
+                return NotFound("Usuário não encontrado ou inativo.");
+
+            usuario.Nome = dto.Nome;
+            usuario.Email = dto.Email;
+
+            // Atualiza a senha só se foi informada
+            if (!string.IsNullOrWhiteSpace(dto.Senha))
+                usuario.Senha = dto.Senha;
+
+            _context.SaveChanges();
+
+            return Ok("Conta atualizada com sucesso.");
+        }
+
+        [HttpGet("buscar")]
+        public async Task<IActionResult> BuscarUsuarios([FromQuery] string termo)
+        {
+            if (string.IsNullOrWhiteSpace(termo))
+                return BadRequest("Termo de busca inválido.");
+
+            var usuarios = await _context.Usuarios
+                .Where(u => u.Nome.Contains(termo) || u.Email.Contains(termo))
+                .ToListAsync();
 
             return Ok(usuarios);
         }
+
 
     }
 }

@@ -3,12 +3,16 @@
 @inject HttpClient Http
 @using System.Net.Http.Json
 @using SylvanianAppShared.DTOs;
-
+@inject IJSRuntime JS
 
 
 <link href="css/home.css" rel="stylesheet" />
 
 <h1 class="boas-vindas">Configurar Contas</h1>
+
+<input placeholder="🔍 Buscar por nome ou email" @bind="filtroBusca" @bind:event="oninput" />
+<button @onclick="BuscarUsuario">Buscar</button>
+
 
 @if (contas == null)
 {
@@ -24,31 +28,162 @@ else
         @foreach (var conta in contas)
         {
             <div class="conta-card">
-                <p><strong>Nome:</strong> @conta.Nome</p>
-                <p><strong>Email:</strong> @conta.Email</p>
-                <button @onclick="@(() => EditarConta(conta))">✏️ Editar</button>
+                @if (conta.Id == contaEmEdicao?.Id)
+                {
+                    <input placeholder="Nome" @bind="contaEmEdicao.Nome" />
+                    <input placeholder="Email" @bind="contaEmEdicao.Email" />
+                    <input placeholder="Senha" type="password" @bind="contaEmEdicao.Senha" />
+
+                    <button @onclick="SalvarAlteracoes">💾 Salvar</button>
+                    <button @onclick="CancelarEdicao">❌ Cancelar</button>
+                    <button @onclick="@(() => InativarConta(conta.Id))">❌ Inativar</button>
+
+                }
+                else
+                {
+                    <p><strong>Nome:</strong> @conta.Nome</p>
+                    <p><strong>Email:</strong> @conta.Email</p>
+                    <button @onclick="@(() => EditarConta(conta))">✏️ Editar</button>
+                }
             </div>
         }
     </div>
+
+    @if (contasInativas.Any())
+    {
+        <h3>Usuários Inativos</h3>
+        @foreach (var conta in contasInativas)
+        {
+            <div>
+                <span>@conta.Nome</span>
+                <button @onclick="@(() => AtivarConta(conta.Id))">✅ Ativar</button>
+            </div>
+        }
+    }
+
 }
 
 @code {
     private List<UsuarioDTO> contas = new();
+    private UsuarioDTO contaEmEdicao;
 
-    protected override async Task OnInitializedAsync()
+    private string filtroBusca = string.Empty;
+
+    private async Task BuscarUsuario()
     {
+        if (string.IsNullOrWhiteSpace(filtroBusca))
+        {
+            await CarregarContas(); // se estiver vazio, recarrega tudo
+            return;
+        }
+
         try
         {
-            contas = await Http.GetFromJsonAsync<List<UsuarioDTO>>("api/auth/ativos");
+            var resultado = await Http.GetFromJsonAsync<List<UsuarioDTO>>($"api/auth/buscar?termo={Uri.EscapeDataString(filtroBusca)}");
+
+            contas = resultado.Where(c => c.Ativo).ToList();
+            contasInativas = resultado.Where(c => !c.Ativo).ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Erro ao carregar contas: " + ex.Message);
+            Console.WriteLine("Erro na busca: " + ex.Message);
         }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarContas();
     }
 
     private void EditarConta(UsuarioDTO conta)
     {
-        Console.WriteLine($"Editar conta: {conta.Email}");
+        contaEmEdicao = new UsuarioDTO
+            {
+                Id = conta.Id,
+                Nome = conta.Nome,
+                Email = conta.Email,
+                Senha = "" // Por segurança, não mostrar a senha original
+            };
+    }
+
+    private async Task InativarConta(int id)
+    {
+        var confirmacao = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja inativar este usuário?");
+        if (!confirmacao)
+            return;
+
+        try
+        {
+            var response = await Http.PutAsync($"api/auth/inativar/{id}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await CarregarContas();
+            }
+            else
+            {
+                var erro = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("Erro ao inativar: " + erro);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erro: " + ex.Message);
+        }
+    }
+
+    private List<UsuarioDTO> contasInativas = new();
+
+    private async Task CarregarContas()
+    {
+        var todas = await Http.GetFromJsonAsync<List<UsuarioDTO>>("api/auth/ativos"); // ou um endpoint mais completo se tiver
+        contas = todas.Where(c => c.Ativo).ToList();
+        contasInativas = todas.Where(c => !c.Ativo).ToList();
+    }
+
+    private async Task AtivarConta(int id)
+    {
+        var confirmar = await JS.InvokeAsync<bool>("confirm", "Deseja reativar este usuário?");
+        if (!confirmar) return;
+
+        var response = await Http.PutAsync($"api/auth/ativar/{id}", null);
+        if (response.IsSuccessStatusCode)
+        {
+            await CarregarContas();
+        }
+        else
+        {
+            var erro = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Erro ao ativar: " + erro);
+        }
+    }
+
+
+
+    private async Task SalvarAlteracoes()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/auth/editar/{contaEmEdicao.Id}", contaEmEdicao);
+            if (response.IsSuccessStatusCode)
+            {
+                contaEmEdicao = null;
+                await CarregarContas();
+            }
+            else
+            {
+                var erro = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("Erro ao editar: " + erro);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erro: " + ex.Message);
+        }
+    }
+
+    private void CancelarEdicao()
+    {
+        contaEmEdicao = null;
     }
 }

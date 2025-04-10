@@ -43,7 +43,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/usuario/login", login);
+            var response = await Http.PostAsJsonAsync("api/auth/login", login);
 
             if (response.IsSuccessStatusCode)
             {
@@ -56,7 +56,7 @@
 
                 mensagem = result.mensagem;
                 await Task.Delay(1000);
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo("/home");
             }
             else
             {

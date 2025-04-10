@@ -36,7 +36,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/usuario/RecuperarSenha", new { Email = email });
+            var response = await Http.PostAsJsonAsync("api/auth/RecuperarSenha", new { Email = email });
 
             if (response.IsSuccessStatusCode)
             {
