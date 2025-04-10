@@ -1,0 +1,54 @@
+﻿@page "/configuracoes"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject HttpClient Http
+@using System.Net.Http.Json
+@using SylvanianAppShared.DTOs;
+
+
+
+<link href="css/home.css" rel="stylesheet" />
+
+<h1 class="boas-vindas">Configurar Contas</h1>
+
+@if (contas == null)
+{
+    <p>Carregando contas...</p>
+}
+else if (!contas.Any())
+{
+    <p>Nenhuma conta cadastrada.</p>
+}
+else
+{
+    <div class="lista-contas">
+        @foreach (var conta in contas)
+        {
+            <div class="conta-card">
+                <p><strong>Nome:</strong> @conta.Nome</p>
+                <p><strong>Email:</strong> @conta.Email</p>
+                <button @onclick="@(() => EditarConta(conta))">✏️ Editar</button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<UsuarioDTO> contas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            contas = await Http.GetFromJsonAsync<List<UsuarioDTO>>("api/auth/ativos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erro ao carregar contas: " + ex.Message);
+        }
+    }
+
+    private void EditarConta(UsuarioDTO conta)
+    {
+        Console.WriteLine($"Editar conta: {conta.Email}");
+    }
+}

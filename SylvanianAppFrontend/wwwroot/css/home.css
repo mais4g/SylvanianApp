@@ -1,0 +1,54 @@
+﻿.home-container {
+    max-width: 600px;
+    margin: auto;
+    text-align: center;
+    padding: 2rem;
+}
+
+.boas-vindas {
+    font-size: 2rem;
+    color: #333;
+}
+
+.mensagem {
+    margin: 1rem 0;
+    font-size: 1.2rem;
+}
+
+.config-button {
+    background-color: #5a67d8;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.config-button:hover {
+    background-color: #434190;
+}
+
+.lista-contas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.conta-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #f9f9f9;
+}
+
+    .conta-card button {
+        background-color: #3182ce;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin-top: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+    }

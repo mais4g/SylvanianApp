@@ -1,0 +1,37 @@
+﻿@page "/home"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager Navigation
+@using SylvanianAppShared.DTOs;
+
+
+<link href="css/home.css" rel="stylesheet" />
+
+<div class="home-container">
+    <h1 class="boas-vindas">Bem-vindo, @nomeUsuario!</h1>
+
+    <p class="mensagem">
+        Aqui você pode gerenciar suas contas cadastradas no portal SylvanianApp.
+    </p>
+
+    <button class="config-button" @onclick="IrParaConfiguracoes">
+        ⚙️ Configurar Contas
+    </button>
+</div>
+
+@code {
+    private string nomeUsuario = "Usuário";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var nomeSalvo = await localStorage.GetItemAsync<string>("usuario");
+        if (!string.IsNullOrEmpty(nomeSalvo))
+        {
+            nomeUsuario = nomeSalvo;
+        }
+    }
+
+    private void IrParaConfiguracoes()
+    {
+        Navigation.NavigateTo("/configuracoes");
+    }
+}

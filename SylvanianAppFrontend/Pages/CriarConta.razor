@@ -1,7 +1,9 @@
-﻿@page "/RecuperarSenha"
+﻿@page "/CriarConta"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @using System.Net.Http.Json
+@using SylvanianAppShared.DTOs;
+
 
 <link href="css/login.css" rel="stylesheet" />
 
@@ -60,10 +62,5 @@
         }
     }
 
-    public class CriarContaDTO
-    {
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Senha { get; set; }
-    }
+
 }

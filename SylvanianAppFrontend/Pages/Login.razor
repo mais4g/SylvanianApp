@@ -3,7 +3,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 @inject ILocalStorageService localStorage
-
+@using SylvanianAppShared.DTOs;
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Authorization
 @using SylvanianAppFrontend.Authentication
@@ -68,12 +68,6 @@
         {
             mensagem = "Erro: " + ex.Message;
         }
-    }
-
-    public class LoginDTO
-    {
-        public string Email { get; set; }
-        public string Senha { get; set; }
     }
 
     public class LoginResult

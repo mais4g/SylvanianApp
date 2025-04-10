@@ -16,7 +16,7 @@ namespace SylvanianAppApi.Controllers
             _context = context;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public IActionResult Login(LoginDTO dto)
         {
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == dto.Email && u.Senha == dto.Senha && u.Ativo);
@@ -28,7 +28,7 @@ namespace SylvanianAppApi.Controllers
             return Ok(new { mensagem = "Login realizado com sucesso!", usuario = usuario.Nome });
         }
 
-        [HttpPost("criar-conta")]
+        [HttpPost("CriarConta")]
         public IActionResult CriarConta(CriarContaDTO dto)
         {
             if (_context.Usuarios.Any(u => u.Email == dto.Email))
@@ -63,10 +63,10 @@ namespace SylvanianAppApi.Controllers
             return Ok("Usuário inativado com sucesso.");
         }
 
-        [HttpPost("recuperar-senha")]
-        public IActionResult RecuperarSenha([FromBody] string email)
+        [HttpPost("RecuperarSenha")]
+        public IActionResult RecuperarSenha([FromBody] RecuperarSenhaDTO dto)
         {
-            var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Ativo);
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == dto.Email && u.Ativo);
             if (usuario == null)
                 return NotFound("Usuário não encontrado ou inativo.");
 
@@ -74,7 +74,7 @@ namespace SylvanianAppApi.Controllers
             return Ok("Se o e-mail estiver correto, uma mensagem foi enviada com instruções.");
         }
 
-        [HttpGet("ativos")]
+        [HttpGet("Ativos")]
         public IActionResult ListarUsuariosAtivos()
         {
             var usuarios = _context.Usuarios
