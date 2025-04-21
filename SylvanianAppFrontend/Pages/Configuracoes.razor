@@ -2,9 +2,10 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject HttpClient Http
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
 @using SylvanianAppShared.DTOs;
-@inject IJSRuntime JS
 @layout MainLayout
+@inject IJSRuntime JS
 @attribute [Authorize(Roles = "Admin")]
 
 

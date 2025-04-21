@@ -7,5 +7,6 @@ namespace SylvanianAppApi.Models
         public required string Email { get; set; }
         public required string Senha { get; set; }
         public bool Ativo { get; set; } = true;
+        public bool Administrador { get; set; } = false;
     }
 }
